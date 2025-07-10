@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorio de Simulación de Software</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f9fafb; color: #1a202c; }
+    .tab-button { transition: all 0.3s; border-bottom: 3px solid transparent; }
+    .tab-button.active { color: #c09b3c; border-bottom-color: #c09b3c; }
+    .simulation-control-button {
+      transition: all 0.3s;
+      background-color: #c09b3c;
+      color: white;
+      box-shadow: 0 4px 14px 0 rgba(192, 155, 60, 0.39);
+    }
+    .simulation-control-button:hover {
+      background-color: #a88734;
+      box-shadow: 0 6px 20px 0 rgba(192, 155, 60, 0.5);
+    }
+    .simulation-control-button:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .simulation-canvas {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
+    }
+    .fade-in-section {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s, transform 0.8s;
+    }
+    .fade-in-section.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #leaf-extra-results b { color: #0e7490; }
+    #leaf-extra-results { background: #f0fdfa; border-radius: 0.5rem; padding: 0.75rem; }
+  </style>
+</head>
+<body class="antialiased">
+
+<main>
+  <!-- Portada Institucional -->
+  <section class="w-full bg-white py-10 flex flex-col items-center border-b border-gray-200 fade-in-section">
+    <img src="logo_isft.png" alt="Logo ISFT 118" class="w-40 h-40 object-contain mb-4" style="max-width:180px;max-height:180px;">
+    <h1 class="text-2xl md:text-3xl font-bold text-center text-blue-900 mb-2">
+      Instituto Superior de Formación Técnica N°118<br>
+      Desarrollo de Software – Primer Año
+    </h1>
+    <div class="mt-4 text-base md:text-lg text-gray-800 text-center space-y-1">
+      <div><b>Materia:</b> Práctica Profesionalizante</div>
+      <div><b>Profesor:</b> Gabriel Gaona</div>
+      <div><b>Alumnos:</b> Belpoliti Thiago, Balladares Esteban, Perez Fabrizio y Cabrera Mateo</div>
+      <div><b>Tema a abordar:</b> Simulación</div>
+    </div>
+  </section>
+
+  <!-- Intro Simulación de Software -->
+  <section class="py-12 bg-white fade-in-section border-b border-gray-200">
+    <div class="container mx-auto max-w-4xl px-4">
+      <div class="mb-8 text-center">
+        <h1 class="text-4xl font-bold mb-2 text-gray-900">Simulación de Software</h1>
+        <p class="text-lg text-gray-700">
+          La simulación es una herramienta fundamental en ciencias y tecnología. Permite investigar hipótesis, analizar sistemas y predecir comportamientos usando modelos matemáticos y computacionales.
+        </p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="text-xl font-semibold text-cyan-800 mb-2">¿Qué es?</h3>
+          <ul class="list-disc ml-6 text-gray-700 space-y-2">
+            <li>
+              <b>En ciencias:</b> Artificio para investigar hipótesis mediante modelos, ideal para la enseñanza y el aprendizaje.
+            </li>
+            <li>
+              <b>En informática:</b> Un programa o red de ordenadores que simula un modelo abstracto de un sistema. Permite analizar, modelar, imitar o predecir el comportamiento de sistemas antes de implementarlos.
+            </li>
+            <li>
+              Utiliza algoritmos, modelos matemáticos y datos reales o hipotéticos para representar dinámicamente cómo funcionará un sistema bajo diferentes condiciones, usuarios o escenarios.
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold text-cyan-800 mb-2">¿Para qué se utiliza?</h3>
+          <ul class="list-disc ml-6 text-gray-700 space-y-2">
+            <li><b>QA:</b> Predecir fallos y probar software (ej: Google simula miles de escenarios antes de lanzar versiones).</li>
+            <li><b>UI/UX:</b> Simular interacción de usuarios (ej: Figma simula recorridos para mejorar usabilidad).</li>
+            <li><b>Software auto-reparable:</b> Algoritmos genéticos corrigen errores automáticamente (ej: GenProg de MIT).</li>
+            <li><b>Educación:</b> Simuladores ayudan a comprender lógica y flujo de programas (ej: PseInt).</li>
+            <li><b>Finanzas:</b> Simular inversiones, riesgos y movimientos (ej: simuladores de plazo fijo, préstamos, cripto).</li>
+            <li><b>Videojuegos:</b> Simulación de luz realista, destrucción procedural, fluidos, etc.</li>
+            <li><b>Eventos naturales:</b> Simulación de desastres, terremotos, realidad virtual para formación y análisis.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-8 mt-10">
+        <div>
+          <h3 class="text-xl font-semibold text-cyan-800 mb-2">Impacto en la industria</h3>
+          <ul class="list-disc ml-6 text-gray-700 space-y-2">
+            <li><b>Eficiencia:</b> Reduce tiempos de prueba y debugging.</li>
+            <li><b>Reducción de costos:</b> Permite prever fallos sin ejecutar en producción.</li>
+            <li><b>Calidad y robustez:</b> Mejora la confiabilidad en sistemas críticos.</li>
+            <li><b>Innovación:</b> Facilita el prototipado de ideas disruptivas.</li>
+            <li><b>Accesibilidad:</b> Democratiza el acceso a experiencias tecnológicas.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold text-cyan-800 mb-2">Herramientas y lenguajes</h3>
+          <div class="flex flex-wrap gap-2 mb-2">
+            <span class="bg-gray-100 text-cyan-800 px-3 py-1 rounded-full text-sm font-semibold">Python</span>
+            <span class="bg-gray-100 text-cyan-800 px-3 py-1 rounded-full text-sm font-semibold">JavaScript/TypeScript</span>
+            <span class="bg-gray-100 text-cyan-800 px-3 py-1 rounded-full text-sm font-semibold">R</span>
+            <span class="bg-gray-100 text-cyan-800 px-3 py-1 rounded-full text-sm font-semibold">C/C++</span>
+          </div>
+          <ul class="list-disc ml-6 text-gray-700 space-y-2">
+            <li><b>SciPy, NumPy, PyMC</b> (Python científico y estadístico)</li>
+            <li><b>Figma, Uizard, Framer AI</b> (prototipado UI/UX)</li>
+            <li><b>DEAP</b> (algoritmos evolutivos en Python)</li>
+            <li><b>Unity</b> (simulación 3D y educativa)</li>
+            <li><b>MATLAB, Simulink</b> (simulación técnica y de sistemas físicos)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-8 mt-10">
+        <div>
+          <h3 class="text-xl font-semibold text-cyan-800 mb-2">Desafíos y problemas</h3>
+          <ul class="list-disc ml-6 text-gray-700 space-y-2">
+            <li><b>Consumo de recursos:</b> Algunas simulaciones requieren mucho cálculo.</li>
+            <li><b>Precisión limitada:</b> Depende de la calidad de modelos y datos.</li>
+            <li><b>Complejidad en validación:</b> Difícil asegurar que la simulación representa la realidad.</li>
+            <li><b>Curva de aprendizaje:</b> Requiere conocimientos matemáticos y estadísticos.</li>
+            <li><b>Integración:</b> Llevar la simulación a sistemas reales puede ser complejo.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold text-cyan-800 mb-2">Conclusión</h3>
+          <p class="text-gray-700 mb-2">
+            La simulación de software es un habilitador de innovación: permite anticipar, experimentar y optimizar con menor riesgo. Su impacto se ve en QA, diseño UX, educación y software inteligente. Con IA y computación accesible, su presencia seguirá creciendo
+          </p>
+          <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+            <b>Reflexión:</b> Adoptar simulación en etapas tempranas del desarrollo no es una opción, sino una estrategia clave para garantizar calidad, eficiencia y evolución. Es una competencia fundamental para el desarrollador de software moderno.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fundamentos Matemáticos -->
+  <section class="py-12 bg-gray-50 fade-in-section">
+    <div class="container mx-auto max-w-3xl px-4">
+      <h2 class="text-2xl font-bold mb-4">Fundamentos Matemáticos</h2>
+      <p class="mb-2 text-gray-700">
+        El método de Monte Carlo utiliza la aleatoriedad para resolver problemas que pueden ser deterministas en principio. Por ejemplo, para estimar el área bajo una curva o la probabilidad de un evento complejo, se generan muestras aleatorias y se calcula un promedio.
+      </p>
+      <div id="katex-integral" class="bg-white p-4 rounded-lg"></div>
+      <p class="mt-2 text-gray-700">
+        A medida que aumenta el número de simulaciones, el resultado converge hacia el valor real gracias a la <strong>ley de los grandes números</strong>.
+      </p>
+    </div>
+  </section>
+
+  <!-- Tabs Experimentos -->
+  <section class="container mx-auto px-4 py-16 fade-in-section">
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold text-gray-900">Laboratorio de Simulación</h2>
+      <p class="mt-4 text-lg text-gray-600">Seleccione un experimento para comenzar.</p>
+    </div>
+    <nav class="flex justify-center gap-4 mb-8">
+      <button id="tab-area" class="tab-button active">Área de Figuras</button>
+      <button id="tab-pi" class="tab-button">Estimación de π</button>
+    </nav>
+
+    <!-- Área de Figuras -->
+    <div id="content-area" class="simulation-panel grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+      <div>
+        <h3 class="text-2xl font-bold mb-2">Estimación de Área</h3>
+        <p class="mb-2 text-gray-600">Selecciona una figura y lanza dardos aleatorios para estimar su área.</p>
+        <label for="leaf-shape" class="block text-sm font-medium text-gray-700">Figura:</label>
+        <select id="leaf-shape" class="mt-1 block w-full rounded border-gray-300 mb-2">
+          <option value="ceibo">Hoja de ceibo</option>
+          <option value="maple">Hoja de arce</option>
+          <option value="circle">Círculo</option>
+          <option value="triangle">Triángulo</option>
+          <option value="square">Cuadrado</option>
+          <option value="star">Estrella</option>
+        </select>
+        <label for="leaf-darts" class="block text-sm font-medium text-gray-700">Número de dardos:</label>
+        <input type="range" id="leaf-darts" min="1000" max="500000" value="10000" step="1000" class="w-full mt-2">
+        <span id="leaf-darts-value" class="block text-center font-semibold mt-1">10,000</span>
+        <button id="run-leaf-sim" class="simulation-control-button w-full py-3 rounded-lg font-semibold mt-4">Iniciar Simulación</button>
+        <div id="leaf-theory" class="mt-4 text-gray-700 text-sm"></div>
+        <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200 text-blue-900 text-base">
+          <b>¿Cómo funciona?</b> Se lanzan puntos aleatorios sobre el recuadro. El área de la hoja se estima contando cuántos caen dentro de la figura. <br>
+          <span class="text-sm text-blue-700">Cuantos más puntos uses, más precisa será la estimación.</span>
+        </div>
+        <div class="mt-2 text-sm text-gray-500">
+          <span class="inline-block w-3 h-3 rounded-full mr-1" style="background:#22c55e"></span> Dardo dentro de la figura
+          <span class="inline-block w-3 h-3 rounded-full mx-2" style="background:#ef4444"></span> Dardo fuera de la figura
+        </div>
+
+        <!-- Escala de unidades -->
+        <label for="leaf-scale" class="block text-sm font-medium text-gray-700 mt-4">Escala (ej: 50 px = 1 cm):</label>
+        <div class="flex items-center gap-2 mb-2">
+          <input id="leaf-scale-px" type="number" min="1" value="50" class="w-20 rounded border-gray-300 px-2 py-1" />
+          <span class="text-gray-700">px =</span>
+          <input id="leaf-scale-unit" type="number" min="0.0001" step="any" value="1" class="w-20 rounded border-gray-300 px-2 py-1" />
+          <select id="leaf-scale-unit-type" class="rounded border-gray-300 px-2 py-1">
+            <option value="cm">cm</option>
+            <option value="m">m</option>
+            <option value="mm">mm</option>
+            <option value="km">km</option>
+            <option value="in">in</option>
+            <option value="ft">ft</option>
+          </select>
+        </div>
+
+        <!-- Resultados mejorados -->
+        <div id="leaf-results" class="text-center mt-4">
+          <span id="leaf-area-label" class="block text-lg text-gray-700 mb-2">Área estimada de la hoja seleccionada:</span>
+          <span id="leaf-estimated-area" class="block text-4xl font-extrabold text-cyan-700">---</span>
+          <div id="leaf-extra-results" class="mt-4 text-base text-gray-700 space-y-1"></div>
+        </div>
+      </div>
+      <div>
+        <canvas id="leaf-canvas" width="500" height="500" class="simulation-canvas w-full h-auto aspect-square mb-4"></canvas>
+      </div>
+    </div>
+
+    <!-- Estimación de Pi -->
+    <div id="content-pi" class="simulation-panel hidden grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+      <div>
+        <h3 class="text-2xl font-bold mb-2">Estimación de π</h3>
+        <p class="mb-2 text-gray-600">Lanza dardos sobre un cuadrado con un círculo inscrito y observa cómo se aproxima el valor de π.</p>
+        <label for="pi-darts" class="block text-sm font-medium text-gray-700">Número de dardos:</label>
+        <input type="range" id="pi-darts" min="1000" max="500000" value="10000" step="1000" class="w-full mt-2">
+        <span id="pi-darts-value" class="block text-center font-semibold mt-1">10,000</span>
+        <button id="run-pi-sim" class="simulation-control-button w-full py-3 rounded-lg font-semibold mt-4">Iniciar Simulación</button>
+        <div class="mt-4 text-gray-700 text-sm">
+          <b>¿Por qué funciona?</b> La proporción de dardos dentro del círculo respecto al total permite estimar π, ya que π ≈ 4 × (dentro / total).
+        </div>
+        <div class="mt-2 text-sm text-gray-500">
+          <span class="inline-block w-3 h-3 rounded-full mr-1" style="background:#22c55e"></span> Dardo dentro del círculo
+          <span class="inline-block w-3 h-3 rounded-full mx-2" style="background:#ef4444"></span> Dardo fuera del círculo
+        </div>
+        <div id="pi-results" class="mt-4 text-center font-medium text-lg bg-gray-50 p-4 rounded-lg">
+          π estimado: <span class="font-bold">...</span><br>
+          <span id="pi-error" class="block text-sm text-red-600"></span>
+          <div class="mt-2 text-gray-700 text-sm">
+            <b>Nota:</b> Para obtener <u>n</u> decimales correctos de π con Monte Carlo, se requieren aproximadamente <b>10<sup>2n</sup></b> dardos.<br>
+            Por ejemplo:<br>
+            • 2 decimales (~3.14): <b>10,000</b> dardos<br>
+            • 3 decimales (~3.142): <b>1,000,000</b> dardos<br>
+            • 4 decimales (~3.1416): <b>100,000,000</b> dardos<br>
+            • 8 decimales (~3.14159265): <b>10,000,000,000,000,000</b> dardos<br>
+            <span class="text-xs text-gray-500">¡Por eso el método es útil para estimar, pero no para alta precisión!</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <canvas id="pi-canvas" width="500" height="500" class="simulation-canvas w-full h-auto aspect-square"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- Referencias y Lecturas Recomendadas -->
+  <section class="py-12 bg-gradient-to-br from-cyan-50 to-blue-100 fade-in-section">
+    <div class="container mx-auto max-w-4xl px-4">
+      <h2 class="text-2xl md:text-3xl font-bold mb-6 text-cyan-900 flex items-center gap-2">
+        <svg class="w-7 h-7 text-cyan-700 inline-block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M12 4v16m0 0H3m9-16l7 7-7 7"></path></svg>
+        Referencias y Lecturas Recomendadas
+      </h2>
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Artículos y Documentación -->
+        <div>
+          <h3 class="text-lg font-semibold text-cyan-800 mb-2 flex items-center gap-2">
+            <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M12 4v16m0 0H3m9-16l7 7-7 7"></path></svg>
+            Artículos y Documentación
+          </h3>
+          <ul class="space-y-2 text-gray-800">
+            <li>
+              <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/path-tracer-in-unrealengine" target="_blank" class="font-semibold text-blue-700 hover:underline flex items-center gap-1">
+                <span>Epic Games. Path Tracer in Unreal Engine</span>
+                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 3h7v7"></path><path d="M5 19l14-14"></path></svg>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.profesionalreview.com/2024/02/14/path-tracing-que-es/" target="_blank" class="font-semibold text-blue-700 hover:underline flex items-center gap-1">
+                <span>Profesional Review. Path Tracing: qué es y cómo mejora el renderizado en videojuegos</span>
+                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 3h7v7"></path><path d="M5 19l14-14"></path></svg>
+              </a>
+            </li>
+            <li>
+              <a href="https://en.wikipedia.org/wiki/Path_tracing" target="_blank" class="text-blue-700 hover:underline">Wikipedia: Path tracing</a>
+            </li>
+            <li>
+              <a href="https://en.wikipedia.org/wiki/Ray_tracing_(graphics)" target="_blank" class="text-blue-700 hover:underline">Wikipedia: Ray tracing (graphics)</a>
+            </li>
+            <li>
+              <a href="https://es.wikipedia.org/wiki/Simulación_(informática)" target="_blank" class="text-blue-700 hover:underline">Wikipedia: Simulación (informática)</a>
+            </li>
+            <li>
+              <a href="https://es.wikipedia.org/wiki/Simulación" target="_blank" class="text-blue-700 hover:underline">Wikipedia: Simulación</a>
+            </li>
+            <li>
+              <a href="https://builtin.com/hardware/computer-simulation" target="_blank" class="text-blue-700 hover:underline">Builtin. What is computer simulation?</a>
+            </li>
+            <li>
+              <a href="https://www.linkedin.com/pulse/el-impacto-de-la-inteligencia-artificial-en-diseño-uiux-solvexdo-imuce/" target="_blank" class="text-blue-700 hover:underline">Solvexdo. El impacto de la inteligencia artificial en diseño UI/UX</a>
+            </li>
+            <li>
+              <a href="https://doi.org/10.24215/18509959.25.e04" target="_blank" class="text-blue-700 hover:underline">Martínez, F., & González, C. (2020). Simulación computacional: Una herramienta educativa en ingeniería</a>
+            </li>
+            <li>
+              Noriega, J. M., & Villalobos, J. R. (2018). Simulación de sistemas complejos utilizando Python y herramientas libres. Universidad Nacional Autónoma de México.
+            </li>
+            <li>
+              <a href="https://revistas.um.es/red/article/view/330931" target="_blank" class="text-blue-700 hover:underline">Pérez, D., & García, J. (2018). La simulación como herramienta en el desarrollo de software educativo</a>
+            </li>
+            <li>
+              Sosa, G. (2020). Introducción a la simulación computacional: Aplicaciones en ciencias e ingeniería. Universidad Nacional del Sur.
+            </li>
+            <li>
+              García, R., & Ramos, M. (2017). Modelado y simulación de sistemas: Una aproximación con MATLAB y Simulink. Alfaomega Grupo Editor.
+            </li>
+          </ul>
+        </div>
+        <!-- Videos y Multimedia -->
+        <div>
+          <h3 class="text-lg font-semibold text-cyan-800 mb-2 flex items-center gap-2">
+            <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="10,8 16,12 10,16"></polygon></svg>
+            Videos y Multimedia
+          </h3>
+          <ul class="space-y-2 text-gray-800">
+            <li>
+              <a href="https://youtu.be/qBrz5UJ4-bQ" target="_blank" class="font-semibold text-blue-700 hover:underline flex items-center gap-1">
+                <span>CG Cookie. Path Tracing is the Future of Game Graphics</span>
+                <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M10 8l6 4-6 4V8z"></path></svg>
+              </a>
+            </li>
+            <li>
+              <a href="https://youtu.be/OgO1gpXSUzU" target="_blank" class="font-semibold text-blue-700 hover:underline flex items-center gap-1">
+                <span>Data Science Dojo. Monte Carlo Simulation Explained in 4 Minutes</span>
+                <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M10 8l6 4-6 4V8z"></path></svg>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.youtube.com/watch?v=m4X94Sq1Q4M" target="_blank" class="font-semibold text-blue-700 hover:underline flex items-center gap-1">
+                <span>Think Twice Code Once. Monte Carlo Simulation: What Is It & How Does It Work?</span>
+                <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M10 8l6 4-6 4V8z"></path></svg>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.youtube.com/watch?v=7ESK5SaP-bc" target="_blank" class="font-semibold text-blue-700 hover:underline flex items-center gap-1">
+                <span>Steve Brunton. What is the Monte Carlo method?</span>
+                <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M10 8l6 4-6 4V8z"></path></svg>
+              </a>
+            </li>
+          </ul>
+          <div class="mt-6 grid gap-4">
+            <iframe class="rounded-lg shadow" width="100%" height="200" src="https://www.youtube.com/embed/qBrz5UJ4-bQ" title="Path Tracing is the Future of Game Graphics" frameborder="0" allowfullscreen></iframe>
+            <iframe class="rounded-lg shadow" width="100%" height="200" src="https://www.youtube.com/embed/OgO1gpXSUzU" title="Monte Carlo Simulation Explained in 4 Minutes" frameborder="0" allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 text-center text-sm text-gray-500">
+        <span class="inline-block bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full font-semibold">¡Explora, aprende y experimenta!</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="bg-gray-900 text-gray-400 mt-24">
+  <div class="container mx-auto py-8 px-4 text-center text-sm">
+    <p>&copy; 2025 Laboratorio de Simulación de Software. Un proyecto de investigación.</p>
+  </div>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // --- FADE-IN ANIMATION ---
+  const fadeInSections = document.querySelectorAll('.fade-in-section');
+  if (fadeInSections.length > 0 && 'IntersectionObserver' in window) {
+    const fadeInObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    fadeInSections.forEach(s => fadeInObserver.observe(s));
+  }
+
+  // --- KATEX RENDERING ---
+  if (window.katex) {
+    katex.render("\\int_a^b f(x)\\,dx \\approx (b-a)\\,\\frac{1}{N}\\sum_{i=1}^N f(x_i)", document.getElementById('katex-integral'), { throwOnError: false, displayMode: true });
+  }
+
+  // --- TAB NAVIGATION ---
+  const tabs = document.querySelectorAll(".tab-button");
+  const panels = [document.getElementById("content-area"), document.getElementById("content-pi")];
+  tabs.forEach((tab, idx) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      panels.forEach((panel, i) => panel.classList.toggle("hidden", i !== idx));
+    });
+  });
+
+  // --- LEAF SIMULATION ---
+  const leafCanvas = document.getElementById('leaf-canvas');
+  const leafCtx = leafCanvas ? leafCanvas.getContext('2d') : null;
+  const leafShapeSelect = document.getElementById('leaf-shape');
+  const leafDartsSlider = document.getElementById('leaf-darts');
+  const leafDartsValue = document.getElementById('leaf-darts-value');
+  const runLeafSimBtn = document.getElementById('run-leaf-sim');
+  const leafEstimatedAreaEl = document.getElementById('leaf-estimated-area');
+  const scalePxInput = document.getElementById('leaf-scale-px');
+  const scaleUnitInput = document.getElementById('leaf-scale-unit');
+  const scaleUnitType = document.getElementById('leaf-scale-unit-type');
+  const leafExtraResults = document.getElementById('leaf-extra-results');
+  let leafPath = getLeafPath(leafShapeSelect ? leafShapeSelect.value : "ceibo");
+
+  let lastLeafDots = [];
+  let lastLeafTotal = 0;
+  let lastLeafShape = "ceibo";
+  let lastLeafArea = "---";
+  let lastLeafAreaPx = null;
+
+  function drawLeaf() {
+    if (!leafCtx) return;
+    leafCtx.clearRect(0, 0, 500, 500);
+    leafCtx.strokeStyle = '#22c55e';
+    leafCtx.lineWidth = 3;
+    leafCtx.stroke(leafPath);
+  }
+
+  function getLeafPath(shape) {
+    switch (shape) {
+      case "circle":
+        const p = new Path2D();
+        p.arc(250, 250, 180, 0, 2 * Math.PI);
+        return p;
+      case "triangle":
+        return new Path2D("M250,70 L430,430 L70,430 Z");
+      case "square":
+        return new Path2D("M90,90 H410 V410 H90 Z");
+      case "star":
+        const star = new Path2D();
+        const cx = 250, cy = 250, spikes = 5, outerRadius = 180, innerRadius = 70;
+        let rot = Math.PI / 2 * 3;
+        let x = cx, y = cy;
+        let step = Math.PI / spikes;
+        star.moveTo(cx, cy - outerRadius);
+        for (let i = 0; i < spikes; i++) {
+          x = cx + Math.cos(rot) * outerRadius;
+          y = cy + Math.sin(rot) * outerRadius;
+          star.lineTo(x, y);
+          rot += step;
+          x = cx + Math.cos(rot) * innerRadius;
+          y = cy + Math.sin(rot) * innerRadius;
+          star.lineTo(x, y);
+          rot += step;
+        }
+        star.lineTo(cx, cy - outerRadius);
+        star.closePath();
+        return star;
+      case "maple":
+        return new Path2D(
+          "M250,120 L220,200 L150,160 L200,230 L110,220 L200,270 L130,300 L210,290 L170,360 L240,320 L230,410 L250,350 L270,410 L260,320 L330,360 L290,290 L370,300 L300,270 L390,220 L300,230 L350,160 L280,200 Z"
+        );
+      case "ceibo":
+        return new Path2D(
+          "M250,420 L230,320 Q180,340 140,410 Q170,320 120,320 Q180,280 80,270 Q170,260 120,200 Q200,230 170,140 Q230,200 250,100 Q270,200 330,140 Q300,230 380,200 Q330,260 420,270 Q320,280 380,320 Q330,320 360,410 Q320,340 270,320 Z"
+        );
+      default:
+        return new Path2D(
+          "M250,420 L230,320 Q180,340 140,410 Q170,320 120,320 Q180,280 80,270 Q170,260 120,200 Q200,230 170,140 Q230,200 250,100 Q270,200 330,140 Q300,230 380,200 Q330,260 420,270 Q320,280 380,320 Q330,320 360,410 Q320,340 270,320 Z"
+        );
+    }
+  }
+
+  function drawLeafDots() {
+    if (!leafCtx) return;
+    drawLeaf();
+    if (lastLeafDots.length) {
+      for (const dot of lastLeafDots) {
+        leafCtx.fillStyle = dot.inside ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.3)';
+        leafCtx.beginPath();
+        leafCtx.arc(dot.x, dot.y, 1.5, 0, 2 * Math.PI);
+        leafCtx.fill();
+      }
+    }
+  }
+
+  // --- ÁREAS TEÓRICAS PARA FIGURAS GEOMÉTRICAS ---
+  function getTheoreticalArea(shape) {
+    switch (shape) {
+      case "circle":
+        // Radio 180 px
+        return Math.PI * 180 * 180;
+      case "square":
+        // Lado 320 px (de 90 a 410)
+        return 320 * 320;
+      case "triangle":
+        // Base 360 px, altura 360 px
+        return (360 * 360) / 2;
+      default:
+        return null;
+    }
+  }
+
+  // --- ÁREA DE REFERENCIA PARA FIGURAS ABSTRACTAS ---
+  function getReferenceArea(shape) {
+    // Usamos el área del canvas (500x500) o círculo inscrito (radio 250)
+    if (shape === "circle") return Math.PI * 250 * 250;
+    return 500 * 500;
+  }
+
+  // --- ACTUALIZA LOS RESULTADOS MEJORADOS ---
+  function showEnhancedResults(areaPx, shape) {
+    // 1. Porcentaje respecto al canvas
+    const canvasArea = 500 * 500;
+    const percentCanvas = (areaPx / canvasArea) * 100;
+
+    // 2. Área teórica y error relativo (solo para figuras geométricas)
+    const theoretical = getTheoreticalArea(shape);
+    let errorRel = null;
+    if (theoretical) {
+      errorRel = Math.abs(areaPx - theoretical) / theoretical * 100;
+    }
+
+    // 3. Escala a unidades reales
+    const px = parseFloat(scalePxInput.value) || 1;
+    const unit = parseFloat(scaleUnitInput.value) || 1;
+    const unitType = scaleUnitType.value || "cm";
+    // 1 px = (unit / px) unidades
+    const pxToUnit = unit / px;
+    const areaReal = areaPx * pxToUnit * pxToUnit;
+
+    // 4. Comparación con figura de referencia
+    let refArea = getReferenceArea(shape);
+    let percentRef = (areaPx / refArea) * 100;
+    let refLabel = (shape === "circle") ? "círculo inscrito en el canvas" : "canvas";
+
+    // 5. Construcción de resultados
+    let html = `
+      <div><b>Porcentaje respecto al canvas:</b> ${percentCanvas.toFixed(2)}%</div>
+      <div><b>Área estimada en ${unitType}<sup>2</sup>:</b> ${areaReal.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} ${unitType}<sup>2</sup></div>
+      <div><b>Comparación con ${refLabel}:</b> ${percentRef.toFixed(2)}%</div>
+    `;
+
+    if (theoretical) {
+      html += `<div><b>Área teórica:</b> ${theoretical.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} px<sup>2</sup></div>
+      <div><b>Error relativo:</b> ${errorRel.toFixed(4)}%</div>`;
+    } else {
+      html += `<div class="text-gray-500 text-sm">No hay área teórica exacta para esta figura.</div>`;
+    }
+
+    leafExtraResults.innerHTML = html;
+  }
+
+  // --- ACTUALIZA RESULTADOS AL CAMBIAR ESCALA ---
+  [scalePxInput, scaleUnitInput, scaleUnitType].forEach(el => {
+    el.addEventListener('input', () => {
+      if (lastLeafAreaPx && lastLeafShape) {
+        showEnhancedResults(lastLeafAreaPx, lastLeafShape);
+      }
+    });
+  });
+
+  leafDartsSlider.addEventListener('input', () => {
+    leafDartsValue.textContent = Number(leafDartsSlider.value).toLocaleString();
+    if (parseInt(leafDartsSlider.value) === lastLeafTotal && leafShapeSelect.value === lastLeafShape) {
+      drawLeafDots();
+      leafEstimatedAreaEl.textContent = lastLeafTotal ? lastLeafArea : "---";
+      if (lastLeafAreaPx && lastLeafShape) showEnhancedResults(lastLeafAreaPx, lastLeafShape);
+    } else {
+      drawLeaf();
+      leafEstimatedAreaEl.textContent = "---";
+      leafExtraResults.innerHTML = "";
+    }
+  });
+
+  leafShapeSelect.addEventListener('change', () => {
+    leafPath = getLeafPath(leafShapeSelect.value);
+    updateLeafAreaLabel(leafShapeSelect.value);
+    if (parseInt(leafDartsSlider.value) === lastLeafTotal && leafShapeSelect.value === lastLeafShape) {
+      drawLeafDots();
+      leafEstimatedAreaEl.textContent = lastLeafTotal ? lastLeafArea : "---";
+      if (lastLeafAreaPx && lastLeafShape) showEnhancedResults(lastLeafAreaPx, lastLeafShape);
+    } else {
+      drawLeaf();
+      leafEstimatedAreaEl.textContent = "---";
+      leafExtraResults.innerHTML = "";
+    }
+  });
+
+  if (runLeafSimBtn && leafCtx) {
+    runLeafSimBtn.addEventListener('click', () => {
+      drawLeaf();
+      let dartsInside = 0;
+      const totalDarts = parseInt(leafDartsSlider.value);
+      let dartsThrown = 0;
+      lastLeafDots = [];
+      lastLeafTotal = totalDarts;
+      lastLeafShape = leafShapeSelect.value;
+
+      function animateDarts() {
+        const batchSize = totalDarts > 20000 ? 5000 : Math.max(1, Math.floor(totalDarts / 200));
+        for (let i = 0; i < batchSize && dartsThrown < totalDarts; i++) {
+          const x = Math.random() * 500;
+          const y = Math.random() * 500;
+          let inside = leafCtx.isPointInPath(leafPath, x, y);
+          leafCtx.fillStyle = inside ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.3)';
+          leafCtx.beginPath();
+          leafCtx.arc(x, y, 1.5, 0, 2 * Math.PI);
+          leafCtx.fill();
+          lastLeafDots.push({x, y, inside});
+          if (inside) dartsInside++;
+          dartsThrown++;
+        }
+        const area = (dartsInside / dartsThrown) * 500 * 500;
+        lastLeafAreaPx = area;
+        lastLeafArea = "area = " + area.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) + " px²";
+        leafEstimatedAreaEl.textContent = lastLeafArea;
+        showEnhancedResults(area, leafShapeSelect.value);
+        if (dartsThrown < totalDarts) {
+          requestAnimationFrame(animateDarts);
+        }
+      }
+      animateDarts();
+    });
+    drawLeaf();
+  }
+
+  // --- TEXTO DINÁMICO DE ÁREA ---
+  function updateLeafAreaLabel(shape) {
+    const label = document.getElementById('leaf-area-label');
+    let text = "Área estimada de la hoja seleccionada:";
+    switch (shape) {
+      case "circle":
+        text = "Área estimada del círculo:";
+        break;
+      case "triangle":
+        text = "Área estimada del triángulo:";
+        break;
+      case "square":
+        text = "Área estimada del cuadrado:";
+        break;
+      case "star":
+        text = "Área estimada de la estrella:";
+        break;
+      case "maple":
+        text = "Área estimada de la hoja de arce:";
+        break;
+      case "ceibo":
+        text = "Área estimada de la hoja de ceibo:";
+        break;
+    }
+    label.textContent = text;
+  }
+  updateLeafAreaLabel(leafShapeSelect.value);
+
+  // --- PI SIMULATION (igual que antes) ---
+  const piCanvas = document.getElementById('pi-canvas');
+  const piCtx = piCanvas ? piCanvas.getContext('2d') : null;
+  const piDartsSlider = document.getElementById('pi-darts');
+  const piDartsValue = document.getElementById('pi-darts-value');
+  const runPiSimBtn = document.getElementById('run-pi-sim');
+  const piResultsEl = document.getElementById('pi-results') ? document.getElementById('pi-results').querySelector('span') : null;
+  const piErrorEl = document.getElementById('pi-error');
+
+  let lastPiDots = [];
+  let lastPiTotal = 0;
+  let lastPiArea = "---";
+
+  function drawPiDots() {
+    if (!piCtx) return;
+    piCtx.clearRect(0, 0, 500, 500);
+    piCtx.strokeStyle = '#1e293b';
+    piCtx.lineWidth = 2;
+    piCtx.strokeRect(0, 0, 500, 500);
+    piCtx.beginPath();
+    piCtx.arc(250, 250, 250, 0, 2 * Math.PI);
+    piCtx.strokeStyle = '#f59e42';
+    piCtx.stroke();
+    // Dibuja TODOS los puntos guardados, sin importar la cantidad
+    if (lastPiDots.length) {
+      for (const dot of lastPiDots) {
+        piCtx.fillStyle = dot.inside ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.3)';
+        piCtx.beginPath();
+        piCtx.arc(dot.x, dot.y, 1.5, 0, 2 * Math.PI);
+        piCtx.fill();
+      }
+    }
+  }
+
+  piDartsSlider.addEventListener('input', () => {
+    piDartsValue.textContent = Number(piDartsSlider.value).toLocaleString();
+    if (parseInt(piDartsSlider.value) === lastPiTotal) {
+      drawPiDots();
+      if (lastPiArea !== "---") {
+        piResultsEl.textContent = lastPiArea;
+      }
+    } else {
+      piCtx.clearRect(0, 0, 500, 500);
+      piCtx.strokeStyle = '#1e293b';
+      piCtx.lineWidth = 2;
+      piCtx.strokeRect(0, 0, 500, 500);
+      piCtx.beginPath();
+      piCtx.arc(250, 250, 250, 0, 2 * Math.PI);
+      piCtx.strokeStyle = '#f59e42';
+      piCtx.stroke();
+      piResultsEl.textContent = "---";
+      piErrorEl.textContent = "";
+    }
+  });
+
+  if (runPiSimBtn && piCtx) {
+    runPiSimBtn.addEventListener('click', () => {
+      piCtx.clearRect(0, 0, 500, 500);
+      piCtx.strokeStyle = '#1e293b';
+      piCtx.lineWidth = 2;
+      piCtx.strokeRect(0, 0, 500, 500);
+      piCtx.beginPath();
+      piCtx.arc(250, 250, 250, 0, 2 * Math.PI);
+      piCtx.strokeStyle = '#f59e42';
+      piCtx.stroke();
+
+      let inside = 0, thrown = 0;
+      const total = parseInt(piDartsSlider.value);
+      lastPiDots = [];
+      lastPiTotal = total;
+
+      function animatePiDarts() {
+        const batchSize = total > 20000 ? 5000 : Math.max(1, Math.floor(total / 200));
+        for (let i = 0; i < batchSize && thrown < total; i++) {
+          const x = Math.random() * 500;
+          const y = Math.random() * 500;
+          const dx = x - 250, dy = y - 250;
+          let isInside = dx * dx + dy * dy <= 250 * 250;
+          // SIEMPRE guarda y dibuja todos los puntos
+          piCtx.fillStyle = isInside ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.3)';
+          piCtx.beginPath();
+          piCtx.arc(x, y, 1.5, 0, 2 * Math.PI);
+          piCtx.fill();
+          lastPiDots.push({x, y, inside: isInside});
+          if (isInside) inside++;
+          thrown++;
+        }
+        const piEstimate = 4 * inside / thrown;
+        lastPiArea = piEstimate.toFixed(8);
+        piResultsEl.textContent = lastPiArea;
+        const absError = Math.abs(piEstimate - Math.PI);
+        const relError = (absError / Math.PI) * 100;
+        piErrorEl.textContent = `Error absoluto: ${absError.toExponential(2)} | Error relativo: ${relError.toFixed(6)}%`;
+        if (thrown < total) {
+          requestAnimationFrame(animatePiDarts);
+        }
+      }
+      animatePiDarts();
+    });
+    drawPiDots();
+  }
+
+  // Redibuja puntos al cambiar de tab
+  tabs[0].addEventListener("click", () => {
+    if (parseInt(leafDartsSlider.value) === lastLeafTotal && leafShapeSelect.value === lastLeafShape) {
+      drawLeafDots();
+      leafEstimatedAreaEl.textContent = lastLeafTotal ? lastLeafArea : "---";
+      if (lastLeafAreaPx && lastLeafShape) showEnhancedResults(lastLeafAreaPx, lastLeafShape);
+    } else {
+      drawLeaf();
+      leafEstimatedAreaEl.textContent = "---";
+      leafExtraResults.innerHTML = "";
+    }
+  });
+  tabs[1].addEventListener("click", () => {
+    drawLeaf();
+    drawPiDots();
+  });
+
+  // Dibuja la figura inicial al cargar la página
+  drawLeaf();
+  drawPiDots();
+});
+</script>
+</body>
+</html>
